@@ -2,7 +2,8 @@ import { Client } from "@stomp/stompjs";
 import backendURL from "./backendURL";
 
 function wsURL() {
-    return backendURL().replace("/growdent", "").replace(/^http/, "ws") + "/ws";
+    const apiUrl = backendURL();
+    return apiUrl.replace(/^http/, "ws") + "/ws";
 }
 
 let client = null;
@@ -10,12 +11,25 @@ const pendingSubscriptions = new Map();
 
 function ensureClient() {
     if (!client) {
-        client = new Client({ brokerURL: wsURL(), reconnectDelay: 5000, onConnect: () => {
-            pendingSubscriptions.forEach((cb, roomId) => {
-                const sub = client.subscribe("/topic/room/" + roomId, (frame) => cb(JSON.parse(frame.body)));
-                pendingSubscriptions.set(roomId, { callback: cb, subscription: sub });
-            });
-        } });
+        client = new Client({
+            brokerURL: wsURL(),
+            reconnectDelay: 5000,
+            onConnect: () => {
+                pendingSubscriptions.forEach((entry, roomId) => {
+                    if (entry.subscription) return;
+
+                    const sub = client.subscribe("/topic/room/" + roomId, (frame) => {
+                        try {
+                            entry.callback(JSON.parse(frame.body));
+                        } catch (error) {
+                            console.error("Chat message parse error", error);
+                        }
+                    });
+
+                    pendingSubscriptions.set(roomId, { ...entry, subscription: sub });
+                });
+            },
+        });
         client.activate();
     }
     return client;
@@ -24,38 +38,46 @@ function ensureClient() {
 export function subscribeRoom(roomId, onMessage) {
     const c = ensureClient();
 
-    if (pendingSubscriptions.has(roomId)) {
-        const prev = pendingSubscriptions.get(roomId);
-        if (prev && prev.callback !== onMessage) {
-            prev.subscription?.unsubscribe();
-            pendingSubscriptions.set(roomId, { callback: onMessage, subscription: null });
-        }
+    const existing = pendingSubscriptions.get(roomId);
+    if (existing && existing.callback !== onMessage) {
+        existing.subscription?.unsubscribe();
+        pendingSubscriptions.set(roomId, { callback: onMessage, subscription: null });
     }
 
     if (c.connected) {
-        const existing = pendingSubscriptions.get(roomId);
-        if (existing && existing.subscription) {
-            existing.callback = onMessage;
+        const active = pendingSubscriptions.get(roomId);
+        if (active && active.subscription) {
+            active.callback = onMessage;
             return () => {
-                existing.subscription.unsubscribe();
+                active.subscription.unsubscribe();
                 pendingSubscriptions.delete(roomId);
             };
         }
 
-        const sub = c.subscribe("/topic/room/" + roomId, (frame) => onMessage(JSON.parse(frame.body)));
+        const sub = c.subscribe("/topic/room/" + roomId, (frame) => {
+            try {
+                onMessage(JSON.parse(frame.body));
+            } catch (error) {
+                console.error("Chat message parse error", error);
+            }
+        });
+
         pendingSubscriptions.set(roomId, { callback: onMessage, subscription: sub });
+
         return () => {
             sub.unsubscribe();
             pendingSubscriptions.delete(roomId);
         };
     }
 
-    pendingSubscriptions.set(roomId, { callback: onMessage, subscription: null });
+    const entry = pendingSubscriptions.get(roomId) || { callback: onMessage, subscription: null };
+    entry.callback = onMessage;
+    pendingSubscriptions.set(roomId, entry);
 
     return () => {
-        const existing = pendingSubscriptions.get(roomId);
-        if (existing && existing.subscription) {
-            existing.subscription.unsubscribe();
+        const current = pendingSubscriptions.get(roomId);
+        if (current?.subscription) {
+            current.subscription.unsubscribe();
         }
         pendingSubscriptions.delete(roomId);
     };
