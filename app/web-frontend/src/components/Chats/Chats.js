@@ -179,14 +179,22 @@ const Chats = ({ currentUser }) => {
 
     function send() {
         if (!draft.trim() || activeRoomId == null) return;
+        const content = draft.trim();
+        setDraft("");
         fetch(backendURL() + "/chats/" + activeRoomId + "/messages", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ senderId: currentUser.id, content: draft })
+            body: JSON.stringify({ senderId: currentUser.id, content })
         })
             .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-            .then(() => setDraft(""))
-            .catch(() => setError("Nachricht konnte nicht gesendet werden."));
+            .then((response) => {
+                setMessages((prev) => prev.some((m) => m.id === response.id) ? prev : [...prev, response]);
+                setRooms((prev) => prev.map((roomItem) => roomItem.id === activeRoomId ? { ...roomItem, updatedAt: response.timestamp } : roomItem));
+            })
+            .catch(() => {
+                setDraft(content);
+                setError("Nachricht konnte nicht gesendet werden.");
+            });
     }
 
     // "Neuen Chat"-Ansicht schließen und alle zugehörigen Eingaben zurücksetzen.
