@@ -1,94 +1,81 @@
-## Team
-Team Leader: Kjell Bartinger
-Members: Marc Seilz, Alexander Krun, Linus Brinkmann, Max Hannuschka, Dmytro Herus, Rostyslav Miroshnichenko
+# GrowDent
+
+GrowDent ist eine moderne Plattform zur Entdeckung, Organisation und Vernetzung rund um Events im universitären und städtischen Umfeld. Das System verbindet Teilnehmende und Veranstalter über interaktive Event-Graphen, ein intelligentes Empfehlungssystem und integrierte Community-Funktionen.
+
+---
+
+## Kernfunktionen & Features
+
+### 1. Benutzerverwaltung & Authentifizierung
+* **Registrierung & Login:** Getrennte Rollen und Workflows für Teilnehmende (Studierende) und Veranstalter mit rollenbasiertem Zugriffsschutz.
+* **Profilverwaltung:** Individuelle Profileinstellungen, Historie besuchter Events, Level-Fortschritt und Definition persönlicher Interessen sowie Lieblingsgenres.
+* **Veranstalter-Dashboard:** Zentrale Management-Oberfläche für Veranstalter zur Erstellung und Bearbeitung von Events, Einblick in Teilnehmerlisten, Echtzeit-Statistiken, Feedback und Budgetübersichten.
+
+### 2. Intelligentes Empfehlungssystem (Event-Graph)
+* **Dynamischer Empfehlungsbaum:** Statt unübersichtlicher statischer Listen visualisiert ein interaktiver Graph persönliche Event-Pfade basierend auf bisherigen Besuchen und Vorlieben.
+* **Wachsender Graph:** Mit jeder Event-Teilnahme generiert der Empfehlungsalgorithmus neue maßgeschneiderte Vorschläge und erweitert den Graph in Echtzeit.
+* **Events entdecken & beitreten:** Vollständige Detailansichten zu Events inklusive Mindestalter, Ticketpreisen, Location, Wetterinformationen und Restkapazitäten mit direkter Beitrittsfunktion.
+
+### 3. Community & Interaktiver Chat
+* **Echtzeit-Kommunikation:** Integrierter Chat für Teilnehmer und Veranstalter zum direkten Austausch vor, während und nach Veranstaltungen.
+* **Vernetzung:** Finden von Gleichgesinnten mit ähnlichen Interessen für gemeinsame Event-Besuche.
+
+### 4. Feedback & Bewertungssystem
+* **Transparente Reviews:** Teilnehmende können nach Abschluss besuchter Events Bewertungen und detailliertes Feedback abgeben.
+* **Live-Auswertung:** Veranstalter sehen neue Rezensionen fortlaufend in ihrem Dashboard zur kontinuierlichen Qualitätsverbesserung.
+
+---
 
 ## Projekt starten
 
-1. Installiere Docker Desktop Anwendung (https://www.docker.com/products/docker-desktop)
-2. Installiere Node.js (https://nodejs.org/en/download)
-3. In der Konsole im Root-Verzeichnis des Projektes folgendes ausführen
+### Voraussetzungen
+* Java 21
+* Docker & Docker Desktop ([Download](https://www.docker.com/products/docker-desktop))
+* Node.js ([Download](https://nodejs.org/en/download))
 
-```bash
+### 1. Gesamtsystem via Docker starten
+Im Root-Verzeichnis des Repositories ausführen:
+
 docker compose up --build
-```
-4. Front End starten
+2. Frontend separat im Entwicklungsmodus starten
+Falls Anpassungen am Frontend vorgenommen werden:
 
-```bash
 cd app/web-frontend
 npm install
 npm start
-```
+Test-Daten anlegen
+Das Backend muss bereits laufen. Das Skript generiert realistische Testdatensätze für Veranstalter, Teilnehmende sowie gewachsene Event-Bäume:
 
-## Test-Daten anlegen
-
-Backend muss laufen. Am Ende stehen alle E-Mails und Passwörter in der Konsole.
-
-```bash
 node scripts/create-testuser.mjs
-```
+Am Ende des Skripts werden alle generierten E-Mails und Passwörter direkt in der Konsole ausgegeben.
 
-Das Script legt an:
+Enthaltene Testdaten
+2 Veranstalter: 50 Events insgesamt (vergangene Events für das Archiv und kommende Events für Live-Tests).
 
-- **2 Veranstalter** (Clara Berg, Jonas Reuter) mit je 25 Events, also 50 insgesamt –
-  3 pro Veranstalter liegen in der Vergangenheit und tauchen im Dashboard unter
-  „beendet" auf, 22 sind kommend
-- **5 Studierende**: Zeppenfeld, Sachweh, Hirsch (Accounts für unsere Professoren) und
-  zwei Platzhalter (Max/Erika Mustermann) für uns
-- für die drei Professoren-Accounts einen **gewachsenen Event-Graph**: 3 besuchte Events
-  in der Vergangenheit als Pfad, dazu eine Anmeldung für ein kommendes Event
-- **Bewertungen** zu den drei vergangenen Events von Clara Berg – Jonas Reuter bleibt
-  bewusst ohne, damit der Unterschied im Dashboard sichtbar ist
+5 Teilnehmer-Accounts: Accounts mit vorkonfigurierten Event-Graphen, besuchten Events und Einladungen sowie Accounts mit unverzweigten Startvorschlägen für Neuanmeldungen.
 
-Feedback geben alle Studierenden **außer Zeppenfeld** (Liste `OHNE_FEEDBACK` im Script).
-Sein Account bleibt frei, damit sich das Abgeben einer Bewertung live vorführen lässt:
-einloggen → ein besuchtes Event öffnen → „Feedback geben". Die Bewertung taucht sofort
-bei Clara Berg unter „Zu den Bewertungen" auf (die Seite lädt alle 3 Sekunden neu).
+Dynamische Graphen: Offene Events sind eng gestaffelt, sodass wiederholte Beitragsaktionen das adaptive Wachstum des Empfehlungsbaums demonstrieren.
 
-Die beiden Platzhalter-Accounts bekommen einen **frischen, aber wachsenden Baum**: ihre
-Startvorschläge sind zwei kommende Events. Tritt man einem bei, hängt der Graph zwei neue
-Vorschläge an. (Vorher standen dort nur vergangene Termine, denen man nicht mehr beitreten
-kann – Details im Kommentar bei Schritt 7 im Script.)
+Bewertungen & Feedback: Vorkonfigurierte Bewertungen für Feedback-Tests im Veranstalter-Dashboard.
 
-Die 44 kommenden Events sind bewusst dicht gestaffelt (+1 bis +80 Tage): jeder
-Professoren-Account kann in der Präsentation **37–39 mal hintereinander** einem Event
-beitreten, und der Graph wächst dabei mit neuen Vorschlägen weiter. Am Ende der Ausgabe
-steht pro Account, welche Events gerade offen sind.
+Optionale Parameter:
 
-Die sechs vergangenen Events steuern den Event-Graph (siehe Kommentar im Script) – ihre
-Anzahl und Termine bitte nicht ändern. Weitere Events kommen in die Tabelle
-`weitereEvents`, dort gehören ausschließlich kommende Termine hinein.
+# Eigenes Standard-Passwort für Testaccounts vergeben
+GROWDENT_TEST_PASSWORD=meinPasswort node scripts/create-testuser.mjs
 
-Alle Termine liegen relativ zum Präsentationstag (Standard: 29.07.2026). Mehrfaches
-Ausführen ist ungefährlich – vorhandene Accounts, Events und Anmeldungen werden erkannt.
+# Anderen Bezugstag festlegen
+GROWDENT_PRAESENTATION=2026-10-15 node scripts/create-testuser.mjs
+Hinweis: Für eine saubere Generierung des Empfehlungsbaums empfiehlt sich eine leere Datenbank:
 
-```bash
-GROWDENT_TEST_PASSWORD=meinPasswort node scripts/create-testuser.mjs   # anderes Passwort
-GROWDENT_PRAESENTATION=2026-08-05 node scripts/create-testuser.mjs     # anderer Bezugstag
-```
+docker compose down -v
+docker compose up --build
+Entwickler-Workflow
+Um Änderungen im Backend schnell zu kompilieren, ohne das gesamte Stack neu zu bauen:
 
-Am besten auf einer frischen Datenbank laufen lassen (`docker compose down -v`, dann
-`docker compose up --build`). Liegen schon Events aus `testdaten.http` in der DB, lässt
-sich der Event-Graph nicht mehr exakt steuern – das Script weicht dann auf Einladungen
-aus und sagt das in der Ausgabe.
-
-## Workflow
-Wenn ihr jetzt Code ändert, dann macht es Sinn nur das zu kompilieren was ihr auch geändert habt (Wesentlich schneller)
-Beispiel: Ihr ändert was am backend-main dann müsst ihr in der Konsole schreiben:
-```bash
 docker compose up --build backend-main
-```
-(Habt dabei immer die Logs im Docker Desktop auf, falls was nicht läuft)
+Änderungen am Frontend werden dank Hot-Reloading direkt bei geöffnetem Browserfenster wirksam.
 
-Beim Front-End sollten eure Änderung Live geschaltet werden durch einen Seiten Reload.
+Nützliche Befehle
+PostgreSQL-Datenbankterminal direkt im Container öffnen:
 
-## Vorraussetzungen
-
-- Java 21
-- Docker
-- Node
-
-## Befehle
-PostgreSQL Terminal öffnen:
-```bash
 docker exec -it growdent-database-postgresql psql -U growdent -d growdent
-```
