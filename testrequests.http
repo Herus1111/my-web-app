@@ -1,0 +1,179 @@
+
+### 1. show all shops
+GET http://localhost:8080/growdent/shops
+
+### 2. insert shop
+POST http://localhost:8080/growdent/shops
+Content-Type: application/json
+
+{
+  "sellingItemsCount": 67
+}
+
+### 3. show shop with id=1
+GET http://localhost:8080/growdent/shops/1
+
+### Use of mulitvalue attributes (example with user and array)
+POST http://localhost:8080/growdent/users
+Content-Type: application/json
+
+{
+  "firstName": "Max",
+  "lastName": "Mustermann",
+  "level": 3,
+  "status": "Aktiv",
+  "attendedEvents": [
+    "Zahnmedizin-Kongress 2024",
+    "Labor-Workshop Grundlagen",
+    "Sommerfest"
+  ],
+  "statistics": [
+    "5 Logins diese Woche",
+    "3 Feedbacks geschrieben"
+  ]
+}
+###
+GET http://localhost:8080/growdent/users
+
+###
+GET http://localhost:8080/growdent/events
+
+//Tests für Friendships
+### //Freundschaftsanfrage senden (Student 1 und Student 2)
+POST http://localhost:8080/growdent/friendships/request?studentId=1&friendId=3
+### //Freundschaften abrufen
+GET http://localhost:8080/growdent/friendships/1
+### //Anfrage annehmen
+PUT http://localhost:8080/growdent/friendships/accept?studentId=1&friendId=2
+### //Anfrage ablehnen (gleich zu löschen)
+POST http://localhost:8080/growdent/friendships/decline?studentId=1&friendId=3
+### //Freundschaft löschen
+DELETE http://localhost:8080/growdent/friendships/delete?studentId=1&friendId=2
+###
+GET http://localhost:8080/growdent/users
+###
+GET http://localhost:8080/growdent/events/7/participantIds
+###
+POST http://localhost:8080/growdent/events/7/addUser/1
+### Einladung
+POST http://localhost:8080/growdent/EventGraph/inviteUser/1/toEvent/8
+### Eventgraph von User 1 anzeigen lassen
+GET http://localhost:8080/growdent/EventGraph/2
+//Linus lustige Testrequests vom 10.07----------------------------------------------------------
+###
+### 1. Student anlegen
+POST http://localhost:8080/growdent/users/student
+Content-Type: application/json
+
+{
+  "firstName": "Linus",
+  "lastName": "Test",
+  "username": "linus",
+  "email": "linus@test.de",
+  "password": "1234"
+}
+
+### 2. Veranstalter anlegen
+POST http://localhost:8080/growdent/users/veranstalter
+Content-Type: application/json
+
+{
+  "firstName": "Vera",
+  "lastName": "Stalter",
+  "username": "vera",
+  "email": "vera@test.de",
+  "password": "1234"
+}
+
+### 3. IDs rausfinden (type: Student / Veranstalter)
+GET http://localhost:8080/growdent/users
+
+### 4. KERNTEST: Student (ID 1) erstellt -> muss "type": "MiniEvent" liefern
+POST http://localhost:8080/growdent/events/user/1
+Content-Type: application/json
+
+{
+  "name": "Spieleabend",
+  "venue": "Zuhause",
+  "eventdate": "2026-07-20T19:00:00",
+  "organizer": "Linus",
+  "maxSlots": 6,
+  "genre": "Gaming",
+  "treffpunktHinweis": "Klingel bei Brinkmann, 3. Stock",
+  "mitbringliste": "Snacks und Getraenke selbst mitbringen"
+}
+
+### 5. KERNTEST: Veranstalter (ID 2) erstellt -> muss "type": "VeranstalterEvent" liefern
+### Exakt gleiches JSON-Format, nur andere creatorId!
+POST http://localhost:8080/growdent/events/user/2
+Content-Type: application/json
+
+{
+  "name": "Sommerfest",
+  "venue": "Stadthalle",
+  "eventdate": "2026-08-15T18:00:00",
+  "organizer": "Vera",
+  "maxSlots": 300,
+  "genre": "Musik",
+  "ticketPreis": 12.50,
+  "mindestalter": 18,
+  "ticketLink": "https://tickets.bsp.de/sommerfest"
+}
+
+### Gegenprobe: Student schickt ticketpreis mit -> wird ignoriert
+POST http://localhost:8080/growdent/events/user/1
+Content-Type: application/json
+
+{
+  "name": "Schummelversuch",
+  "venue": "Zuhause",
+  "eventdate": "2026-07-28T19:00:00",
+  "organizer": "Linus",
+  "maxSlots": 4,
+  "genre": "Gaming",
+  "ticketPreis": 99.99,
+  "mindestalter": 18
+}
+
+### 7. Alle Events - gemischte Liste mit unterschiedlichem "type"
+GET http://localhost:8080/growdent/events
+
+### 8. Einzelnes Event
+GET http://localhost:8080/growdent/events/1
+
+### 9. Teilnehmer hinzufuegen (testet, dass participantIDs nicht null ist)
+POST http://localhost:8080/growdent/events/1/addUser/2
+
+### 10. Teilnehmerliste -> [2]
+GET http://localhost:8080/growdent/events/1/participantIds
+
+### 11. Fehlerfall: nicht existierender Creator -> muss sauber fehlschlagen
+POST http://localhost:8080/growdent/events/user/9999
+Content-Type: application/json
+
+{
+  "name": "Geistevent",
+  "venue": "Nirgendwo",
+  "eventdate": "2026-09-01T12:00:00",
+  "organizer": "Niemand",
+  "maxSlots": 1,
+  "genre": "Test"
+}
+
+### 12. Fehlerfall: nicht existierendes Event -> 404
+GET http://localhost:8080/growdent/events/9999
+###
+### //Student verlässt Event vorzeitig wieder
+DELETE http://localhost:8080/growdent/events/1/removeUser/2
+
+//Tests für Event-Einladungen
+### //Freund zu Event einladen (Event 1, Student 1 lädt Freund 2 ein)
+POST http://localhost:8080/growdent/events/invitations/invite?eventId=1&inviterId=1&inviteeId=2
+### //Erhaltene Einladungen eines Studenten abrufen
+GET http://localhost:8080/growdent/events/invitations/received/2
+### //Einladungen zu einem Event abrufen (für Event Graph)
+GET http://localhost:8080/growdent/events/invitations/event/1
+### //Einladung annehmen (wird Teilnehmer des Events)
+PUT http://localhost:8080/growdent/events/invitations/accept?invitationId=1
+### //Einladung ablehnen
+DELETE http://localhost:8080/growdent/events/invitations/decline?invitationId=1

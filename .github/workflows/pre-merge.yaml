@@ -1,0 +1,106 @@
+name: Pre Merge Checks
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4.5.0
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Build all Maven modules
+        run: ./mvnw --batch-mode --update-snapshots verify
+
+  discover-deployable-modules:
+    runs-on: ubuntu-latest
+    outputs:
+      has-modules: ${{ steps.modules.outputs.has-modules }}
+      modules: ${{ steps.modules.outputs.modules }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - id: modules
+        name: Discover deployable Maven modules
+        run: |
+          python <<'PY'
+          import json
+          import os
+          import xml.etree.ElementTree as ET
+
+
+          def namespace(root):
+              return {"m": root.tag.split("}", 1)[0][1:]} if root.tag.startswith("{") else {}
+
+
+          def find(node, path):
+              ns = namespace(node)
+              lookup = path if ns else path.replace("m:", "")
+              return node.find(lookup, ns)
+
+
+          def findall(node, path):
+              ns = namespace(node)
+              lookup = path if ns else path.replace("m:", "")
+              return node.findall(lookup, ns)
+
+
+          def discover_modules(pom_path, module_prefix=""):
+              pom_root = ET.parse(pom_path).getroot()
+              modules = []
+
+              for module in findall(pom_root, "m:modules/m:module"):
+                  module_name = (module.text or "").strip()
+                  if not module_name:
+                      continue
+
+                  module_path = os.path.normpath(os.path.join(module_prefix, module_name))
+                  module_pom_path = os.path.join(module_path, "pom.xml")
+                  module_root = ET.parse(module_pom_path).getroot()
+
+                  enabled = find(module_root, "m:properties/m:container.image.enabled")
+                  if enabled is not None and (enabled.text or "").strip().lower() == "true":
+                      artifact_id = find(module_root, "m:artifactId")
+                      image_name = (artifact_id.text or module_path).strip().replace("/", "-").lower()
+                      modules.append({"path": module_path.replace(os.sep, "/"), "image": image_name})
+
+                  modules.extend(discover_modules(module_pom_path, module_path))
+
+              return modules
+
+
+          modules = discover_modules("pom.xml")
+
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              output.write(f"has-modules={'true' if modules else 'false'}\n")
+              output.write(f"modules={json.dumps(modules)}\n")
+          PY
+
+  container-check:
+    needs: [verify, discover-deployable-modules]
+    if: ${{ needs.discover-deployable-modules.outputs.has-modules == 'true' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module: ${{ fromJson(needs.discover-deployable-modules.outputs.modules) }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Build deployable container
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            MODULE=${{ matrix.module.path }}
+          push: false

@@ -1,0 +1,351 @@
+/* GrowDent Design-System — portiert aus design-reference/index.html */
+*, *::before, *::after { box-sizing: border-box; }
+:root {
+  --accent: #19B36A;
+  --accent-soft: #E6F7EE;
+  --accent-deep: #0F7A47;
+  --ink: #0F1419;
+  --ink-2: #2A2F36;
+  --muted: #6B7280;
+  --line: #E6E8EB;
+  --bg: #F4F2EC;
+  --paper: #FFFFFF;
+  --pop-pink: #FF7AB6;
+  --pop-yellow: #FFD23F;
+  --pop-blue: #5B8DEF;
+  --pop-violet: #9B7BFF;
+  --pop-red: #EF4B4B;
+  --radius: 18px;
+  --radius-sm: 12px;
+  --shadow-card: 0 1px 0 rgba(15,20,25,.04), 0 8px 24px -12px rgba(15,20,25,.12);
+  --shadow-pop: 0 4px 0 rgba(15,20,25,.92);
+  --pop-ink: var(--ink);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-display: "Bricolage Grotesque", "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Dunkelmodus: dieselben semantischen Variablen, dunkle Werte. Wird über
+   data-theme="dark" am <html>-Element aktiviert (siehe theme.js). */
+[data-theme="dark"] {
+  /* Native Controls (Datepicker, Datei-Button, Range, Scrollbars) dunkel rendern. */
+  color-scheme: dark;
+  --ink: #F2F3F5;
+  /* Pop-Rand/-Schatten dunkel halten (statt des hellen --ink). */
+  --pop-ink: rgba(0,0,0,.55);
+  --ink-2: #C7CACF;
+  --muted: #98A0AA;
+  --line: #2C313A;
+  --bg: #14161A;
+  --paper: #1E2128;
+  --accent-soft: rgba(25, 179, 106, .16);
+  --accent-deep: #4FD99B;
+  --shadow-card: 0 1px 0 rgba(0,0,0,.25), 0 12px 30px -14px rgba(0,0,0,.7);
+}
+/* Stellen mit fest hinterlegten hellen Farben für den Dunkelmodus nachziehen. */
+[data-theme="dark"] .nav-item:hover { background: #23272F; }
+[data-theme="dark"] .nav-item.active { background: #2A2F38; color: var(--ink); }
+[data-theme="dark"] .me-card:hover,
+[data-theme="dark"] .me-card.active { background: #23272F; }
+[data-theme="dark"] .chip { background: #2A2F38; }
+[data-theme="dark"] .btn.dark { background: #2A2F38; color: var(--ink); border-color: #2A2F38; }
+[data-theme="dark"] .progress { background: #2C313A; }
+[data-theme="dark"] .topbar { background: rgba(20,22,26,0.85); }
+[data-theme="dark"] .pill.streak { background: #2A2F38; color: var(--ink); border-color: #2A2F38; }
+[data-theme="dark"] .brand-mark { background: #2A2F38; }
+/* Primary-Buttons: im Dunkelmodus keinen hellen Rand/Pop-Schatten (--ink ist hell). */
+[data-theme="dark"] .btn.primary { border-color: transparent; box-shadow: 0 3px 0 rgba(0,0,0,.5); }
+[data-theme="dark"] .btn.primary:hover:not(:disabled) { box-shadow: 0 5px 0 rgba(0,0,0,.5); }
+[data-theme="dark"] .card.popped { border-color: var(--line); }
+
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+input, select, textarea { font-family: inherit; }
+::selection { background: var(--accent); color: white; }
+
+/* App shell — nutzt die volle Fensterbreite (Sidebar bündig links). */
+.app {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+  padding: 28px 20px;
+  border-right: 1px solid var(--line);
+  background: var(--paper);
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; gap: 8px;
+  overflow-y: auto;
+}
+.brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 10px 18px;
+}
+.brand-mark {
+  width: 38px; height: 38px; border-radius: 12px;
+  background: var(--ink); color: white;
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 800;
+  font-size: 22px;
+  box-shadow: 4px 4px 0 var(--accent);
+}
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 700; font-size: 22px; letter-spacing: -0.02em;
+}
+.brand-name span { color: var(--accent); }
+
+.nav-group-label {
+  font-size: 11px; font-weight: 600; color: var(--muted);
+  letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 18px 12px 6px;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 12px;
+  font-weight: 500; font-size: 14.5px; color: var(--ink-2);
+  width: 100%; text-align: left;
+  transition: background .15s, color .15s;
+}
+.nav-item:hover { background: #F7F7F4; }
+.nav-item.active {
+  background: var(--ink); color: white;
+}
+.nav-item.active .nav-icon { color: var(--accent); }
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; display: inline-flex; }
+
+.sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+.me-card {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px; border-radius: 14px;
+  transition: background 0.15s ease;
+}
+.me-card:hover, .me-card.active { background: #F7F7F4; }
+.me-card-main {
+  display: flex; align-items: center; gap: 10px;
+  flex: 1; min-width: 0;
+  color: inherit; text-decoration: none;
+}
+.me-avatar {
+  width: 40px; height: 40px; border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700;
+  color: white;
+}
+.me-name { font-weight: 600; font-size: 14px; }
+.me-meta { font-size: 12px; color: var(--muted); }
+
+/* Main */
+.main {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-width: 0;
+}
+.topbar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 18px 32px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(244,242,236,0.85);
+  backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 5;
+}
+.crumb { font-size: 13px; color: var(--muted); }
+.crumb b { color: var(--ink); font-weight: 600; }
+.topbar-spacer { flex: 1; }
+.pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; border-radius: 999px;
+  font-size: 13px; font-weight: 600;
+  border: 1px solid var(--line); background: var(--paper);
+}
+.pill .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.pill.streak { background: var(--ink); color: white; border-color: var(--ink); }
+.pill.streak .dot { background: var(--pop-yellow); }
+
+.content { padding: 28px 32px 80px; }
+
+/* Reusable */
+.card {
+  background: var(--paper);
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-card);
+}
+.card.flat { box-shadow: none; }
+.card.popped {
+  border: 2px solid var(--ink);
+  box-shadow: var(--shadow-pop);
+}
+.h1 { font-family: var(--font-display); font-size: 44px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.05; margin: 0; }
+.h2 { font-family: var(--font-display); font-size: 28px; font-weight: 700; letter-spacing: -0.02em; line-height: 1.1; margin: 0; }
+.h3 { font-family: var(--font-display); font-size: 20px; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+.muted { color: var(--muted); }
+.row { display: flex; align-items: center; gap: 12px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 18px; border-radius: 12px;
+  font-weight: 600; font-size: 14px;
+  border: 1px solid var(--line); background: var(--paper);
+  transition: transform .12s, background .12s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { cursor: not-allowed; opacity: .5; transform: none; }
+.btn.primary {
+  background: var(--accent); color: var(--ink);
+  border-color: var(--ink);
+  box-shadow: 0 3px 0 var(--ink);
+  font-weight: 700;
+}
+.btn.primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 0 var(--ink); }
+.btn.dark { background: var(--ink); color: white; border-color: var(--ink); }
+.btn.ghost { background: transparent; border: 1px solid var(--line); }
+.btn.danger {
+  background: var(--pop-red); color: white;
+  border-color: var(--pop-ink);
+  box-shadow: 0 3px 0 var(--pop-ink);
+  font-weight: 700;
+}
+.btn.danger:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 5px 0 var(--pop-ink); }
+.btn.icon { padding: 10px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px; border-radius: 999px;
+  font-size: 12px; font-weight: 600;
+  background: #F4F2EC; color: var(--ink-2);
+}
+.chip.green { background: var(--accent-soft); color: var(--accent-deep); }
+.chip.pink { background: #FFE6F0; color: #B73C7B; }
+.chip.yellow { background: #FFF6D6; color: #8B6E00; }
+.chip.blue { background: #E6EEFD; color: #2D5BC9; }
+
+.progress {
+  height: 8px; border-radius: 999px; background: #EFEDE6; overflow: hidden;
+}
+.progress > span { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+
+/* Häkchen-Kreis (z. B. Onboarding-Rollenkarten). Weißer Kreis mit dunklem Haken
+   im Dunkelmodus, damit er sowohl auf der dunklen als auch auf der grünen
+   (ausgewählten) Karte gut sichtbar bleibt. */
+.perk-check { background: var(--ink); color: #fff; }
+[data-theme="dark"] .perk-check { background: #fff; color: #14161A; }
+
+/* Form controls */
+.input {
+  width: 100%; padding: 12px 14px; border-radius: 12px;
+  border: 1px solid var(--line); outline: none;
+  font-size: 15px; background: var(--bg); color: var(--ink);
+}
+.input:focus { border-color: var(--ink); }
+.field-label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; }
+
+/* Nativen Datei-Button ans Design-System anpassen (sonst hell im Dunkelmodus). */
+input[type="file"]::file-selector-button {
+  font: inherit; margin-right: 10px;
+  padding: 8px 14px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--paper); color: var(--ink);
+  cursor: pointer; transition: background .12s;
+}
+input[type="file"]::file-selector-button:hover { background: var(--bg); }
+
+/* Sticker decoration */
+.sticker {
+  position: absolute;
+  font-family: var(--font-display);
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--pop-yellow);
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-6deg);
+  font-size: 13px;
+  white-space: nowrap;
+}
+.sticker.pink { background: var(--pop-pink); color: white; }
+.sticker.green { background: var(--accent); }
+.sticker.violet { background: var(--pop-violet); color: white; }
+
+/* Generic placeholder striped */
+.placeholder {
+  background: repeating-linear-gradient(135deg, #F4F2EC, #F4F2EC 8px, #ECEAE2 8px, #ECEAE2 16px);
+  color: var(--muted);
+  display: grid; place-items: center;
+  font-family: var(--font-mono); font-size: 11px;
+  border-radius: 12px;
+}
+
+/* Avatar generic */
+.av {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--font-display); font-weight: 700; color: white;
+  background: var(--pop-blue);
+  flex-shrink: 0;
+}
+.av.lg { width: 56px; height: 56px; font-size: 22px; }
+.av.xl { width: 88px; height: 88px; font-size: 32px; }
+
+/* Screen container animation */
+.screen-enter { animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* Confetti dot bg */
+.dot-bg {
+  background-image: radial-gradient(rgba(15,20,25,0.06) 1px, transparent 1px);
+  background-size: 18px 18px;
+}
+
+/* Auth shell (Login / Onboarding) — vollflächig zentriert */
+.auth-shell {
+  position: relative;
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 48px 24px;
+  background: var(--bg);
+}
+.auth-inner {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 720px;
+}
+
+/* ---- Work-in-Progress / Gamification-Demo Markierung ---- */
+/* Kennzeichnet Elemente, die im Design schon da sind, aber noch nicht
+   funktional angebunden sind (z.B. ausgegraute XP-Leiste). */
+.wip-wrap { position: relative; }
+.wip {
+  opacity: .55;
+  filter: grayscale(0.35);
+  pointer-events: none;
+  user-select: none;
+}
+.wip-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .02em;
+  background: #FFF6D6; color: #8B6E00;
+  border: 1px dashed #E0BE4A;
+  white-space: nowrap;
+}
+.wip-badge.floating {
+  position: absolute; top: 12px; right: 12px; z-index: 2;
+  box-shadow: 0 2px 8px rgba(15,20,25,.12);
+}

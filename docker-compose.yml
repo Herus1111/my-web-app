@@ -1,0 +1,79 @@
+services:
+  # Datenbank
+  db:
+    container_name: growdent-database-postgresql
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: growdent
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: growdent      #  = create database growdent
+      PGDATA: /data/postgres
+    volumes:
+      - db:/data/postgres
+    ports:
+      - "5332:5432" #in case default posgresql port 5432 is used
+    networks:
+      - db
+    restart: unless-stopped
+
+  # MQTT-Broker
+  mosquitto:
+    container_name: growdent-mosquitto-broker
+    image: eclipse-mosquitto:latest
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - broker-net
+    restart: unless-stopped
+
+  backend-main:
+    container_name: growdent-backend-main
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: app/backend-main
+    environment:
+      PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/growdent
+      SPRING_DATASOURCE_USERNAME: growdent
+      SPRING_DATASOURCE_PASSWORD: password
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - mosquitto
+    networks:
+      - db
+      - broker-net
+    restart: unless-stopped
+
+  backend-simulator:
+    container_name: growdent-backend-simulator
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MODULE: app/backend-simulator
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mosquitto
+    networks:
+      - broker-net
+    restart: unless-stopped
+
+networks:
+  db:
+    driver: bridge
+  # Netzwerk für asynchrone Kommunikation
+  broker-net:
+    driver: bridge
+
+volumes:
+  db:

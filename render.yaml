@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: growdent-backend
+    runtime: docker
+    dockerfilePath: ./app/backend-main/Dockerfile
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_DATASOURCE_URL
+        fromDatabase:
+          name: growdent-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: growdent-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: growdent-db
+          property: password
+      - key: CORS_ALLOWED_ORIGINS
+        value: https://growdent-frontend.onrender.com
+
+  - type: web
+    name: growdent-frontend
+    runtime: docker
+    dockerfilePath: ./app/web-frontend/Dockerfile
+    plan: free
+    envVars:
+      - key: REACT_APP_API_URL
+        value: https://growdent-backend.onrender.com/growdent

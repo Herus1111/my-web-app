@@ -1,0 +1,19 @@
+curl -X POST http://localhost:8080/growdent/users/student \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Alice",
+    "lastName": "Test",
+    "username": "alice",
+    "email": "alice@test.de",
+    "password": "test1234"
+  }'
+
+curl -X POST http://localhost:8080/growdent/users/student \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "Bob",
+    "lastName": "Test",
+    "username": "bob",
+    "email": "bob@test.de",
+    "password": "test1234"
+  }'

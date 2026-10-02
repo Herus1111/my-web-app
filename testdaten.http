@@ -1,0 +1,875 @@
+### Student 1: Lea
+POST http://localhost:8080/growdent/users/student
+Content-Type: application/json
+
+{
+  "firstName": "Lea",
+  "lastName": "Sommer",
+  "username": "lea.sommer",
+  "email": "lea@example.com",
+  "password": "pass123",
+  "statistics": [
+    "2 Events besucht",
+    "1 Freundschaftsanfrage offen"
+  ],
+  "level": 2,
+  "status": "Aktiv",
+  "attendedEvents": []
+}
+###
+
+### Student 2: Tim
+POST http://localhost:8080/growdent/users/student
+Content-Type: application/json
+
+{
+  "firstName": "Tim",
+  "lastName": "Becker",
+  "username": "tim.becker",
+  "email": "tim@example.com",
+  "password": "pass123",
+  "statistics": [
+    "1 Event besucht",
+    "8 Likes erhalten"
+  ],
+  "level": 4,
+  "status": "Aktiv",
+  "attendedEvents": []
+}
+###
+
+### Veranstalter 3: Anna
+POST http://localhost:8080/growdent/users/veranstalter
+Content-Type: application/json
+
+{
+  "firstName": "Anna",
+  "lastName": "Veranstalter",
+  "username": "anna.organizer",
+  "email": "anna@growdent.de",
+  "password": "pass123",
+  "statistics": [
+    "3 Events geplant"
+  ],
+  "budget": 5000,
+  "verifiziert": true
+}
+###
+
+### Student 4: Max (NEU)
+POST http://localhost:8080/growdent/users/student
+Content-Type: application/json
+
+{
+  "firstName": "Max",
+  "lastName": "Müller",
+  "username": "max.m",
+  "email": "max@example.com",
+  "password": "pass123",
+  "statistics": [
+    "5 Events besucht"
+  ],
+  "level": 3,
+  "status": "Aktiv",
+  "attendedEvents": []
+}
+###
+
+### Student 5: Sophie (NEU)
+POST http://localhost:8080/growdent/users/student
+Content-Type: application/json
+
+{
+  "firstName": "Sophie",
+  "lastName": "Schmidt",
+  "username": "sophie.s",
+  "email": "sophie@example.com",
+  "password": "pass123",
+  "statistics": [],
+  "level": 1,
+  "status": "Aktiv",
+  "attendedEvents": []
+}
+###
+
+### Student 6: Lukas (NEU)
+POST http://localhost:8080/growdent/users/student
+Content-Type: application/json
+
+{
+  "firstName": "Lukas",
+  "lastName": "Weber",
+  "username": "lukas.w",
+  "email": "lukas@example.com",
+  "password": "pass123",
+  "statistics": [
+    "12 Likes erhalten"
+  ],
+  "level": 5,
+  "status": "Aktiv",
+  "attendedEvents": []
+}
+###
+
+### Feedback
+POST http://localhost:8080/growdent/feedback
+Content-Type: application/json
+
+{
+  "userLiked": "Gute Stimmung und nette Leute",
+  "userDisliked": "Getränke waren etwas teuer",
+  "recommendation": 9,
+  "socializingRating": 5,
+  "eventrating": 4
+}
+###
+
+GET http://localhost:8080/growdent/feedback
+###
+
+### Chat Controller
+POST http://localhost:8080/growdent/chats/groups
+Content-Type: application/json
+
+{
+  "name": "Semester Gruppe",
+  "creatorId": 1,
+  "memberIds": [2, 3]
+}
+###
+
+POST http://localhost:8080/growdent/chats/private
+Content-Type: application/json
+
+{
+  "firstUserId": 1,
+  "secondUserId": 2
+}
+###
+
+GET http://localhost:8080/growdent/chats?userId=1
+###
+
+GET http://localhost:8080/growdent/chats/1/messages
+###
+
+POST http://localhost:8080/growdent/chats/1/messages
+Content-Type: application/json
+
+{
+  "senderId": 1,
+  "content": "Hallo zusammen, das ist eine Testnachricht fuer den Gruppenchat."
+}
+###
+
+POST http://localhost:8080/growdent/chats/2/messages
+Content-Type: application/json
+
+{
+  "senderId": 2,
+  "content": "Privatchat-Testnachricht von Lea an Max."
+}
+###
+
+
+### 50 Event-Testdaten (Erstellt über die User-ID 3 von Anna)
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Campus Kickoff",
+  "venue": "Campus Dortmund",
+  "eventdate": "2026-08-01T18:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 60,
+  "genre": "Party",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Indie Night",
+  "venue": "Sound Loft",
+  "eventdate": "2026-08-03T19:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 45,
+  "genre": "Indie",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Techno Session",
+  "venue": "Club Nova",
+  "eventdate": "2026-08-05T22:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 35,
+  "genre": "Techno",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Boardgame Evening",
+  "venue": "Uni Lounge",
+  "eventdate": "2026-08-07T17:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 24,
+  "genre": "Games",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Startup Meetup",
+  "venue": "Innovation Hub",
+  "eventdate": "2026-08-09T18:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 50,
+  "genre": "Business",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Open Air Cinema",
+  "venue": "Riverside Stage",
+  "eventdate": "2026-08-11T21:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 80,
+  "genre": "Film",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Coding Workshop",
+  "venue": "Lab 3",
+  "eventdate": "2026-08-13T15:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 18,
+  "genre": "Tech",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Karaoke Night",
+  "venue": "Bar Central",
+  "eventdate": "2026-08-15T20:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 40,
+  "genre": "Music",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Sports and Drinks",
+  "venue": "Campus Bar",
+  "eventdate": "2026-08-17T19:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 55,
+  "genre": "Sport",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Autumn Jam",
+  "venue": "Music Hall",
+  "eventdate": "2026-08-19T18:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 30,
+  "genre": "Rock",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Study Session",
+  "venue": "Library Room 2",
+  "eventdate": "2026-08-21T14:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 28,
+  "genre": "Study",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "DJ Lab",
+  "venue": "Studio B",
+  "eventdate": "2026-08-23T21:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 22,
+  "genre": "Electronic",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Alumni Talk",
+  "venue": "Auditorium",
+  "eventdate": "2026-08-25T17:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 70,
+  "genre": "Talk",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Picnic at Park",
+  "venue": "Westpark",
+  "eventdate": "2026-08-27T16:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 40,
+  "genre": "Outdoor",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Retro Games Night",
+  "venue": "Game Corner",
+  "eventdate": "2026-08-29T19:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 26,
+  "genre": "Games",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Culture Exchange",
+  "venue": "Community Space",
+  "eventdate": "2026-08-31T18:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 48,
+  "genre": "Culture",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Festival Warmup",
+  "venue": "Open Stage",
+  "eventdate": "2026-09-02T20:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 65,
+  "genre": "Festival",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Pizza and Pitch",
+  "venue": "Startup Loft",
+  "eventdate": "2026-09-04T18:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 32,
+  "genre": "Business",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Late Night Lounge",
+  "venue": "Lounge 5",
+  "eventdate": "2026-09-06T22:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 44,
+  "genre": "Chill",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Winter Closing",
+  "venue": "Main Hall",
+  "eventdate": "2026-09-08T19:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 75,
+  "genre": "Party",
+  "participantIDs": []
+}
+###
+
+### NEUE EVENTS FÜR LÄNGERE BÄUME (30 Stück)
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Bouldering Session",
+  "venue": "Kletterhalle",
+  "eventdate": "2026-09-10T17:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 20,
+  "genre": "Sport",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Poetry Slam",
+  "venue": "Café Nord",
+  "eventdate": "2026-09-12T19:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 35,
+  "genre": "Culture",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "VR Gaming Night",
+  "venue": "Tech Lounge",
+  "eventdate": "2026-09-14T18:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 15,
+  "genre": "Games",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "House Party",
+  "venue": "WG WG",
+  "eventdate": "2026-09-16T21:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 40,
+  "genre": "Party",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Jazz Evening",
+  "venue": "Jazz Club",
+  "eventdate": "2026-09-18T20:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 30,
+  "genre": "Music",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "App Dev Hackathon",
+  "venue": "InnoHub",
+  "eventdate": "2026-09-20T10:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 25,
+  "genre": "Tech",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Yoga in the Park",
+  "venue": "Westpark",
+  "eventdate": "2026-09-22T09:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 20,
+  "genre": "Sport",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Founders Pitch",
+  "venue": "Hörsaal 1",
+  "eventdate": "2026-09-24T18:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 100,
+  "genre": "Business",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Synthwave Night",
+  "venue": "Club 80s",
+  "eventdate": "2026-09-26T22:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 50,
+  "genre": "Electronic",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Silent Disco",
+  "venue": "Campus Wiese",
+  "eventdate": "2026-09-28T21:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 80,
+  "genre": "Party",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Pen & Paper RPG",
+  "venue": "Spielecafé",
+  "eventdate": "2026-10-01T17:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 12,
+  "genre": "Games",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Art Exhibition",
+  "venue": "Galerie Mitte",
+  "eventdate": "2026-10-03T15:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 40,
+  "genre": "Culture",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Networking Breakfast",
+  "venue": "Cafeteria",
+  "eventdate": "2026-10-05T09:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 30,
+  "genre": "Business",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Acoustic Session",
+  "venue": "Irish Pub",
+  "eventdate": "2026-10-07T20:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 45,
+  "genre": "Music",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Marathon Training",
+  "venue": "Stadion",
+  "eventdate": "2026-10-09T17:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 25,
+  "genre": "Sport",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Robotics Workshop",
+  "venue": "Lab 1",
+  "eventdate": "2026-10-11T14:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 15,
+  "genre": "Tech",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Halloween Bash",
+  "venue": "Club Nova",
+  "eventdate": "2026-10-13T22:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 100,
+  "genre": "Party",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Indie Game Showcase",
+  "venue": "Auditorium",
+  "eventdate": "2026-10-15T18:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 60,
+  "genre": "Games",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Finance Seminar",
+  "venue": "Seminarraum 4",
+  "eventdate": "2026-10-17T16:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 30,
+  "genre": "Study",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Salsa Night",
+  "venue": "Dance Studio",
+  "eventdate": "2026-10-19T20:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 40,
+  "genre": "Music",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Hiking Trip",
+  "venue": "Treffpunkt Hbf",
+  "eventdate": "2026-10-21T09:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 20,
+  "genre": "Outdoor",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "E-Sports Tournament",
+  "venue": "Gaming Arena",
+  "eventdate": "2026-10-23T15:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 50,
+  "genre": "Games",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Start-up Dinner",
+  "venue": "Restaurant Zur Linde",
+  "eventdate": "2026-10-25T19:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 15,
+  "genre": "Business",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Theater Premiere",
+  "venue": "Stadttheater",
+  "eventdate": "2026-10-27T19:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 70,
+  "genre": "Culture",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "AI Meetup",
+  "venue": "Tech Lounge",
+  "eventdate": "2026-10-29T18:30:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 40,
+  "genre": "Tech",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Drum & Bass Night",
+  "venue": "Keller Club",
+  "eventdate": "2026-10-31T23:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 60,
+  "genre": "Electronic",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Badminton Cup",
+  "venue": "Sporthalle B",
+  "eventdate": "2026-11-02T16:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 32,
+  "genre": "Sport",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Documentary Screening",
+  "venue": "Kino 2",
+  "eventdate": "2026-11-04T20:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 45,
+  "genre": "Film",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Bake & Connect",
+  "venue": "Campus Küche",
+  "eventdate": "2026-11-06T15:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 12,
+  "genre": "Chill",
+  "participantIDs": []
+}
+###
+
+POST http://localhost:8080/growdent/events/user/3
+Content-Type: application/json
+
+{
+  "name": "Semester Closing Gala",
+  "venue": "Festhalle",
+  "eventdate": "2026-11-08T19:00:00",
+  "organizer": "Anna Veranstalter",
+  "maxSlots": 150,
+  "genre": "Party",
+  "participantIDs": []
+}
