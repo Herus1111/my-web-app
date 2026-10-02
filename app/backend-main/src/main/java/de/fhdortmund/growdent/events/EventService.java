@@ -38,7 +38,12 @@ public class EventService {
                 newEvent.getId(),
                 newEvent.getEventdate().toLocalDate()
         );
-        mqttChannel.send(MessageBuilder.withPayload(payload).build());
+
+        try {
+            mqttChannel.send(MessageBuilder.withPayload(payload).build());
+        } catch (Exception e) {
+            System.err.println("MQTT publish failed; continuing without MQTT notification: " + e.getMessage());
+        }
 
         return newEvent;
     }

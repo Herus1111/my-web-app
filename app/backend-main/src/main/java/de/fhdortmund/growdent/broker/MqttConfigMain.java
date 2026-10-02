@@ -1,6 +1,8 @@
 package de.fhdortmund.growdent.broker;
 
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -15,8 +17,12 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 
 @Configuration
-@EnableIntegration  
+@EnableIntegration
+@ConditionalOnProperty(name = "mqtt.enabled", havingValue = "true", matchIfMissing = true)
 public class MqttConfigMain {
+
+    @Value("${mqtt.broker.url:tcp://mosquitto:1883}")
+    private String brokerUrl;
 
     // Verbindung zum Broker herstellen
     @Bean
@@ -24,7 +30,7 @@ public class MqttConfigMain {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
-        options.setServerURIs(new String[]{"tcp://mosquitto:1883"});
+        options.setServerURIs(new String[]{brokerUrl});
         options.setKeepAliveInterval(30);
         options.setCleanSession(false);
         factory.setConnectionOptions(options);
