@@ -49,8 +49,44 @@ const Chats = ({ currentUser }) => {
     const [selectedIds, setSelectedIds] = useState([]);
     const [search, setSearch] = useState("");
     const [error, setError] = useState("");
+    const [toast, setToast] = useState(null);
+    const [notificationState, setNotificationState] = useState("default");
 
     const scrollRef = useRef(null);
+    const roomSubscriptionsRef = useRef({});
+
+    const showToast = useCallback((title, message) => {
+        setToast({ id: Date.now(), title, message });
+    }, []);
+
+    useEffect(() => {
+        if (!toast) return;
+        const timeout = setTimeout(() => setToast(null), 5000);
+        return () => clearTimeout(timeout);
+    }, [toast]);
+
+    const requestNotifications = useCallback(async () => {
+        if (!("Notification" in window)) {
+            setNotificationState("unsupported");
+            showToast("Benachrichtigungen", "Dein Browser unterstützt keine Web-Benachrichtigungen.");
+            return;
+        }
+
+        const permission = await Notification.requestPermission();
+        setNotificationState(permission);
+
+        if (permission === "granted") {
+            showToast("Benachrichtigungen aktiv", "Du bekommst jetzt neue Chat-Nachrichten sofort.");
+        } else if (permission === "denied") {
+            showToast("Benachrichtigungen blockiert", "Du kannst sie in den Browser-Einstellungen wieder erlauben.");
+        }
+    }, [showToast]);
+
+    useEffect(() => {
+        if ("Notification" in window) {
+            setNotificationState(Notification.permission);
+        }
+    }, []);
 
     // Räume des eingeloggten Nutzers laden.
     const loadRooms = useCallback(() => {
@@ -71,8 +107,6 @@ const Chats = ({ currentUser }) => {
     useEffect(() => {
         loadRooms();
         loadUsers();
-        // Raumliste regelmäßig neu laden, damit ein Chat, den jemand anderes mit
-        // mir startet, automatisch auftaucht (ohne Seiten-Reload).
         const iv = setInterval(loadRooms, 3000);
         return () => clearInterval(iv);
     }, [loadRooms, loadUsers]);
@@ -87,9 +121,54 @@ const Chats = ({ currentUser }) => {
             .then((data) => { if (alive) setMessages(data); })
             .catch(() => {});
 
-        const unsubscribe = subscribeRoom(activeRoomId, (msg) => setMessages((m) => [...m, msg]));
-        return () => { alive = false; unsubscribe(); };
+        return () => { alive = false; };
     }, [activeRoomId]);
+
+    useEffect(() => {
+        const subscribedRoomIds = new Set(Object.keys(roomSubscriptionsRef.current));
+        rooms.forEach((room) => {
+            if (roomSubscriptionsRef.current[room.id]) return;
+
+            roomSubscriptionsRef.current[room.id] = subscribeRoom(room.id, (msg) => {
+                const isOwnMessage = msg.senderId === currentUser.id;
+
+                if (room.id === activeRoomId) {
+                    setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+                }
+
+                if (!isOwnMessage && (room.id !== activeRoomId || document.visibilityState === "hidden" || !document.hasFocus())) {
+                    const senderName = msg.senderName || "Neue Nachricht";
+                    const body = msg.content || "Neue Nachricht";
+
+                    if ("Notification" in window && Notification.permission === "granted") {
+                        new Notification("Neue Nachricht", {
+                            body: `${senderName}: ${body}`,
+                            tag: `chat-${room.id}`,
+                        });
+                    }
+
+                    showToast("Neue Nachricht", `${senderName}: ${body}`);
+                }
+
+                setRooms((prev) => prev.map((roomItem) => roomItem.id === room.id ? { ...roomItem, updatedAt: msg.timestamp } : roomItem));
+                loadRooms();
+            });
+        });
+
+        Object.keys(roomSubscriptionsRef.current).forEach((roomId) => {
+            if (!subscribedRoomIds.has(roomId) && rooms.some((room) => room.id === Number(roomId))) {
+                if (roomSubscriptionsRef.current[roomId]) {
+                    roomSubscriptionsRef.current[roomId]();
+                    delete roomSubscriptionsRef.current[roomId];
+                }
+            }
+        });
+
+        return () => {
+            Object.values(roomSubscriptionsRef.current).forEach((unsubscribe) => unsubscribe && unsubscribe());
+            roomSubscriptionsRef.current = {};
+        };
+    }, [rooms, activeRoomId, currentUser.id, loadRooms, showToast]);
 
     // Bei neuen Nachrichten ans Ende scrollen.
     useEffect(() => {
@@ -106,8 +185,6 @@ const Chats = ({ currentUser }) => {
             body: JSON.stringify({ senderId: currentUser.id, content: draft })
         })
             .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-            // Die Nachricht selbst kommt über das /topic/room/{id}-Abonnement zurück,
-            // hier also nur den Entwurf leeren (sonst würde sie doppelt erscheinen).
             .then(() => setDraft(""))
             .catch(() => setError("Nachricht konnte nicht gesendet werden."));
     }
@@ -177,9 +254,20 @@ const Chats = ({ currentUser }) => {
                 >
                     {showNew ? "Abbrechen" : (<><Icons.Plus size={16} /> Neuer Chat</>)}
                 </button>
+                {notificationState !== "granted" && (
+                    <button className="btn ghost" onClick={requestNotifications}>
+                        Benachr.
+                    </button>
+                )}
             </div>
 
             {error && <div style={{ color: "var(--pop-pink)", marginBottom: 12, fontSize: 14 }}>{error}</div>}
+            {toast && (
+                <div style={{ position: "fixed", right: 20, bottom: 20, zIndex: 2000, minWidth: 260, maxWidth: 360, background: "rgba(18,18,18,0.94)", color: "white", borderRadius: 12, padding: "12px 14px", boxShadow: "0 12px 30px rgba(0,0,0,0.25)" }}>
+                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{toast.title}</div>
+                    <div style={{ fontSize: 13, opacity: 0.9 }}>{toast.message}</div>
+                </div>
+            )}
 
             <div className="card" style={{ padding: 0, overflow: "hidden", display: "grid", gridTemplateColumns: "320px 1fr", flex: 1, minHeight: 0 }}>
 
