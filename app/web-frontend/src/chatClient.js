@@ -1,46 +1,62 @@
 import { Client } from "@stomp/stompjs";
 import backendURL from "./backendURL";
 
-// WebSocketConfig registriert den STOMP-Endpoint unter "/ws" (ohne den
-// "/growdent"-Präfix, den die REST-Controller haben), daher hier separat ableiten.
 function wsURL() {
     return backendURL().replace("/growdent", "").replace(/^http/, "ws") + "/ws";
 }
 
 let client = null;
-function getClient() {
+const pendingSubscriptions = new Map();
+
+function ensureClient() {
     if (!client) {
-        client = new Client({ brokerURL: wsURL(), reconnectDelay: 5000 });
+        client = new Client({ brokerURL: wsURL(), reconnectDelay: 5000, onConnect: () => {
+            pendingSubscriptions.forEach((cb, roomId) => {
+                const sub = client.subscribe("/topic/room/" + roomId, (frame) => cb(JSON.parse(frame.body)));
+                pendingSubscriptions.set(roomId, { callback: cb, subscription: sub });
+            });
+        } });
         client.activate();
     }
     return client;
 }
 
-// Abonniert /topic/room/{roomId} (siehe ChatController/ChatApiController im Backend).
-// Falls die Verbindung noch nicht steht, wird das Abonnement automatisch
-// nachgeholt, sobald sie aufgebaut ist. Gibt eine Unsubscribe-Funktion zurück.
 export function subscribeRoom(roomId, onMessage) {
-    const c = getClient();
-    let sub = null;
-    let cancelled = false;
+    const c = ensureClient();
 
-    const attach = () => {
-        if (cancelled) return;
-        sub = c.subscribe("/topic/room/" + roomId, (frame) => onMessage(JSON.parse(frame.body)));
-    };
+    if (pendingSubscriptions.has(roomId)) {
+        const prev = pendingSubscriptions.get(roomId);
+        if (prev && prev.callback !== onMessage) {
+            prev.subscription?.unsubscribe();
+            pendingSubscriptions.set(roomId, { callback: onMessage, subscription: null });
+        }
+    }
 
     if (c.connected) {
-        attach();
-    } else {
-        const prevOnConnect = c.onConnect;
-        c.onConnect = (frame) => {
-            if (prevOnConnect) prevOnConnect(frame);
-            attach();
+        const existing = pendingSubscriptions.get(roomId);
+        if (existing && existing.subscription) {
+            existing.callback = onMessage;
+            return () => {
+                existing.subscription.unsubscribe();
+                pendingSubscriptions.delete(roomId);
+            };
+        }
+
+        const sub = c.subscribe("/topic/room/" + roomId, (frame) => onMessage(JSON.parse(frame.body)));
+        pendingSubscriptions.set(roomId, { callback: onMessage, subscription: sub });
+        return () => {
+            sub.unsubscribe();
+            pendingSubscriptions.delete(roomId);
         };
     }
 
+    pendingSubscriptions.set(roomId, { callback: onMessage, subscription: null });
+
     return () => {
-        cancelled = true;
-        if (sub) sub.unsubscribe();
+        const existing = pendingSubscriptions.get(roomId);
+        if (existing && existing.subscription) {
+            existing.subscription.unsubscribe();
+        }
+        pendingSubscriptions.delete(roomId);
     };
 }

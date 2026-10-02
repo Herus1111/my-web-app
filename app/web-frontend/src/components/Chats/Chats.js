@@ -111,64 +111,59 @@ const Chats = ({ currentUser }) => {
         return () => clearInterval(iv);
     }, [loadRooms, loadUsers]);
 
-    // Nachrichten des aktiven Raums initial laden, danach live per WebSocket
-    // (/topic/room/{id}) aktualisieren statt zu pollen.
+    // Nachrichten des aktiven Raums initial laden, danach live per WebSocket.
     useEffect(() => {
         if (activeRoomId == null) return;
+
         let alive = true;
         fetch(backendURL() + "/chats/" + activeRoomId + "/messages")
             .then((r) => r.json())
             .then((data) => { if (alive) setMessages(data); })
             .catch(() => {});
 
-        return () => { alive = false; };
-    }, [activeRoomId]);
+        const unsubscribe = subscribeRoom(activeRoomId, (msg) => {
+            if (msg.senderId === currentUser.id) {
+                setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+                return;
+            }
 
-    useEffect(() => {
-        const subscribedRoomIds = new Set(Object.keys(roomSubscriptionsRef.current));
-        rooms.forEach((room) => {
-            if (roomSubscriptionsRef.current[room.id]) return;
+            setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
 
-            roomSubscriptionsRef.current[room.id] = subscribeRoom(room.id, (msg) => {
-                const isOwnMessage = msg.senderId === currentUser.id;
+            if (document.visibilityState === "hidden" || !document.hasFocus()) {
+                const senderName = msg.senderName || "Neue Nachricht";
+                const body = msg.content || "Neue Nachricht";
 
-                if (room.id === activeRoomId) {
-                    setMessages((prev) => (prev.some((m) => m.id === msg.id) ? prev : [...prev, msg]));
+                if ("Notification" in window && Notification.permission === "granted") {
+                    new Notification("Neue Nachricht", {
+                        body: `${senderName}: ${body}`,
+                        tag: `chat-${activeRoomId}`,
+                    });
                 }
 
-                if (!isOwnMessage && (room.id !== activeRoomId || document.visibilityState === "hidden" || !document.hasFocus())) {
-                    const senderName = msg.senderName || "Neue Nachricht";
-                    const body = msg.content || "Neue Nachricht";
-
-                    if ("Notification" in window && Notification.permission === "granted") {
-                        new Notification("Neue Nachricht", {
-                            body: `${senderName}: ${body}`,
-                            tag: `chat-${room.id}`,
-                        });
-                    }
-
-                    showToast("Neue Nachricht", `${senderName}: ${body}`);
-                }
-
-                setRooms((prev) => prev.map((roomItem) => roomItem.id === room.id ? { ...roomItem, updatedAt: msg.timestamp } : roomItem));
-                loadRooms();
-            });
-        });
-
-        Object.keys(roomSubscriptionsRef.current).forEach((roomId) => {
-            if (!subscribedRoomIds.has(roomId) && rooms.some((room) => room.id === Number(roomId))) {
-                if (roomSubscriptionsRef.current[roomId]) {
-                    roomSubscriptionsRef.current[roomId]();
-                    delete roomSubscriptionsRef.current[roomId];
-                }
+                showToast("Neue Nachricht", `${senderName}: ${body}`);
             }
         });
 
         return () => {
-            Object.values(roomSubscriptionsRef.current).forEach((unsubscribe) => unsubscribe && unsubscribe());
-            roomSubscriptionsRef.current = {};
+            alive = false;
+            unsubscribe();
         };
-    }, [rooms, activeRoomId, currentUser.id, loadRooms, showToast]);
+    }, [activeRoomId, currentUser.id, showToast]);
+
+    useEffect(() => {
+        const roomIds = new Set(rooms.map((room) => room.id));
+
+        rooms.forEach((room) => {
+            if (room.id === activeRoomId) return;
+            if (room.id in roomSubscriptionsRef.current) return;
+        });
+
+        Object.keys(roomSubscriptionsRef.current || {}).forEach((roomId) => {
+            if (!roomIds.has(Number(roomId))) {
+                delete roomSubscriptionsRef.current[roomId];
+            }
+        });
+    }, [rooms, activeRoomId]);
 
     // Bei neuen Nachrichten ans Ende scrollen.
     useEffect(() => {
