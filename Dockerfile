@@ -1,6 +1,6 @@
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 
-ARG MODULE
+ARG MODULE=app/backend-main
 
 WORKDIR /app
 
@@ -14,7 +14,7 @@ RUN mvn clean package \
 
 FROM eclipse-temurin:21-jre
 
-ARG MODULE
+ARG MODULE=app/backend-main
 
 WORKDIR /app
 
