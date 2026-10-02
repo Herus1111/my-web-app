@@ -3,7 +3,7 @@ import backendURL from "./backendURL";
 
 function wsURL() {
     const apiUrl = backendURL();
-    return apiUrl.replace(/^http/, "ws") + "/ws";
+    return apiUrl.replace(/\/growdent$/, "").replace(/^http/, "ws") + "/ws";
 }
 
 let client = null;
