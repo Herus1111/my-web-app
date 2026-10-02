@@ -43,6 +43,8 @@ const Chats = ({ currentUser }) => {
     const [activeRoomId, setActiveRoomId] = useState(null);
     const [messages, setMessages] = useState([]);
     const [draft, setDraft] = useState("");
+    const [uploading, setUploading] = useState(false);
+    const fileInputRef = useRef(null);
     const [showNew, setShowNew] = useState(false);
     const [newMode, setNewMode] = useState("private"); // "private" | "group"
     const [groupName, setGroupName] = useState("");
@@ -170,6 +172,15 @@ const Chats = ({ currentUser }) => {
         if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }, [messages]);
 
+    function imageUrlFor(content) {
+        if (!content) return null;
+        if (/^https?:\/\//.test(content)) return content;
+        if (content.startsWith('/')) {
+            return backendURL().replace(/\/growdent$/, '') + content;
+        }
+        return content;
+    }
+
     const activeRoom = rooms.find((r) => r.id === activeRoomId) || null;
 
     function send() {
@@ -190,6 +201,30 @@ const Chats = ({ currentUser }) => {
                 setDraft(content);
                 setError("Nachricht konnte nicht gesendet werden.");
             });
+    }
+
+    async function uploadImage(file) {
+        if (!file || activeRoomId == null) return;
+        setUploading(true);
+        try {
+            const fd = new FormData();
+            fd.append('file', file);
+            fd.append('senderId', String(currentUser.id));
+
+            const res = await fetch(backendURL().replace(/\/growdent$/, '') + "/growdent/chats/" + activeRoomId + "/messages/upload", {
+                method: 'POST',
+                body: fd,
+            });
+            if (!res.ok) throw new Error('upload failed');
+            const response = await res.json();
+            setMessages((prev) => prev.some((m) => m.id === response.id) ? prev : [...prev, response]);
+            setRooms((prev) => prev.map((roomItem) => roomItem.id === activeRoomId ? { ...roomItem, updatedAt: response.timestamp } : roomItem));
+        } catch (e) {
+            console.error(e);
+            showToast('Upload fehlgeschlagen', 'Bild konnte nicht hochgeladen werden.');
+        } finally {
+            setUploading(false);
+        }
     }
 
     // "Neuen Chat"-Ansicht schließen und alle zugehörigen Eingaben zurücksetzen.
@@ -387,6 +422,17 @@ const Chats = ({ currentUser }) => {
                                                             <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 2 }}>{m.senderName}</div>
                                                         )}
                                                         {m.content}
+                                                        {(() => {
+                                                            const url = imageUrlFor(m.content || "");
+                                                            if (url && /\.(png|jpe?g|gif|webp|svg)(\?.*)?$/i.test(url)) {
+                                                                return (
+                                                                    <div style={{ marginTop: 8 }}>
+                                                                        <img src={url} alt="image" style={{ maxWidth: "320px", borderRadius: 8, display: "block" }} />
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })()}
                                                         <div style={{ fontSize: 10, opacity: 0.6, marginTop: 4, textAlign: mine ? "right" : "left" }}>{timeLabel(m.timestamp)}</div>
                                                     </div>
                                                 </div>
@@ -404,6 +450,16 @@ const Chats = ({ currentUser }) => {
                                     placeholder="Nachricht schreiben…"
                                     style={{ flex: 1, padding: "12px 16px", borderRadius: 999, border: "1px solid var(--line)", outline: "none", fontFamily: "inherit", fontSize: 14, background: "var(--bg)", color: "var(--ink)" }}
                                 />
+                                <input ref={fileInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={(e) => {
+                                    const f = e.target.files && e.target.files[0];
+                                    if (f) uploadImage(f);
+                                    e.target.value = null;
+                                }} />
+
+                                <button className="btn ghost icon" title="Bild senden" onClick={() => fileInputRef.current?.click()} style={{ padding: 10 }}>
+                                    <Icons.Plus size={18} />
+                                </button>
+
                                 <button className="btn primary icon" onClick={send} disabled={!draft.trim()} style={{ padding: 12 }}>
                                     <Icons.Send size={16} />
                                 </button>
