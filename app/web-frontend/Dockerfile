@@ -5,7 +5,7 @@ COPY app/web-frontend/package*.json ./
 RUN npm install
 
 COPY app/web-frontend/ ./
-ARG REACT_APP_API_URL=http://localhost:8080/growdent
+ARG REACT_APP_API_URL=https://growdent-backend-production.up.railway.app/growdent
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 RUN npm run build
 
