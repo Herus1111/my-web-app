@@ -16,9 +16,10 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // fürs frontend später ws://localhost:8080/ws
-        // setAllowedOriginPatterns("*") ist wichtig, damit frontend nicht blocked
-        registry.addEndpoint("/ws").setAllowedOriginPatterns(allowedOrigins);
+        // для фронтенда через native WebSocket / @stomp/stompjs
+        registry.addEndpoint("/ws")
+                .setAllowedOriginPatterns("*");
+        // .withSockJS(); // включать только если frontend реально подключается через sockjs-client
     }
 
     @Override
