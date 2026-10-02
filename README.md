@@ -1,4 +1,6 @@
-<img width="1920" height="916" alt="image" src="https://github.com/user-attachments/assets/d3fa5e35-bf7e-4ac5-87d0-95eff805adcf" /># GrowDent
+# GrowDent
+
+<img width="1920" height="916" alt="image" src="https://github.com/user-attachments/assets/d3fa5e35-bf7e-4ac5-87d0-95eff805adcf" />
 
 <img width="1920" height="924" alt="image" src="https://github.com/user-attachments/assets/bf694ac6-3c84-443e-ac16-393c74fc4906" />
 
