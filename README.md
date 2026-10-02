@@ -9,6 +9,9 @@ GrowDent ist eine moderne Plattform zur Entdeckung, Organisation und Vernetzung 
 
 ---
 
+<img width="1920" height="915" alt="image" src="https://github.com/user-attachments/assets/5724eaf6-6dd6-4f82-ac56-9894b1b06647" />
+
+
 ## Kernfunktionen & Features
 
 ### 1. Benutzerverwaltung & Authentifizierung
